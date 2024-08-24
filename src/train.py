@@ -48,7 +48,7 @@ class Kernel:
     def save_file(self,  time, heading=""):
         if self.file:
             if not os.path.isdir('../txt'):
-                print("must be in src dir with train.py.")
+                print("must be in 'src/' dir with 'train.py' and 'txt/' dir above.")
                 return
 
             f = open( '../txt/llm.'+ OPENAI_MODEL.strip() +'.txt', 'a')
@@ -74,8 +74,14 @@ if __name__ == '__main__':
     k = Kernel()
     parser = argparse.ArgumentParser(description="Train LLM - train llm with simple corpus", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--local', action="store_true", help="Not implemented")
- 
+    parser.add_argument('--file', action="store_true", help="Save ouput to file.")
+    parser.add_argument('--verbose', action="store_true", help="Print ouput to the screen.")
+
+
     args = parser.parse_args()
     print(args)
 
     k.save_file(0, str(args))
+
+    k.file = args.file 
+    k.verbose = args.verbose
