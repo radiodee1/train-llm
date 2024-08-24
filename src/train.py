@@ -70,7 +70,7 @@ class Kernel:
                              {'role': 'assistant', 'content' : i[1]}
                             ]
                         }
-                        print(ii)
+                        #print(ii)
                         y.append(ii)
 
 
