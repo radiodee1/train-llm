@@ -3,7 +3,7 @@
 import argparse
 from dotenv import  dotenv_values 
 import os
-import time
+import yaml
 import json
 #
 
@@ -41,6 +41,44 @@ class Kernel:
         self.file = True
         self.file_num = 0
 
+    def save_jsonl(self, infile, outfile='train'):
+         if True:
+            if not os.path.isdir('../jsonl'):
+                print("must be in 'src/' dir with 'train.py' and 'jsonl/' dir above.")
+                return
+            if not os.path.isdir('../../chatterbot-corpus'):
+                print("did you clone chatterbot-corpus??")
+                return
+            corpus_name = '../../chatterbot-corpus/chatterbot_corpus/data/english/' + infile + '.yml'
+            if not os.path.isfile(corpus_name):
+                print(infile, corpus_name)
+                print('something is not in the right place.')
+                return
+            c = open( corpus_name, 'r' )
+            #x = json.dumps(yaml.safe_load(c))
+            x = yaml.safe_load(c)
+            c.close()
+            y = []
+
+            for j in x:
+                if j == "conversations":
+                    for i in x[j]:
+                        ii = {'messages' : 
+                            [ 
+                             {'role': 'system', 'content' : 'You are a helpful assistant.'},
+                             {'role': 'user',   'content': i[0]},
+                             {'role': 'assistant', 'content' : i[1]}
+                            ]
+                        }
+                        print(ii)
+                        y.append(ii)
+
+
+            f = open( '../jsonl/llm.'+ outfile.strip() +'.jsonl', 'a')
+            for i in y:
+                f.write(json.dumps(i) + '\n')
+            f.close()
+
     def p(self, *text):
         if self.verbose:
             print(*text)
@@ -76,7 +114,7 @@ if __name__ == '__main__':
     parser.add_argument('--local', action="store_true", help="Not implemented")
     parser.add_argument('--file', action="store_true", help="Save ouput to file.")
     parser.add_argument('--verbose', action="store_true", help="Print ouput to the screen.")
-
+    parser.add_argument('--jsonl', type=str, help="Add specified corpus file to jsonl file.")
 
     args = parser.parse_args()
     print(args)
@@ -85,3 +123,6 @@ if __name__ == '__main__':
 
     k.file = args.file 
     k.verbose = args.verbose
+
+    if args.jsonl != None and args.jsonl.strip() != "":
+        k.save_jsonl(args.jsonl)
