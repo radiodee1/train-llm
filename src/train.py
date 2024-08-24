@@ -72,18 +72,7 @@ class Kernel:
                                 r = 'assistant'
                             multi.append({'role': r, 'content': i[m]})
                         ii = { 'messages' : multi }
-                        '''
-                        ii = {'messages' : 
-                            [ 
-                             {'role': 'system', 'content' : 'You are a helpful assistant.'},
-                             {'role': 'user',   'content': i[0]},
-                             {'role': 'assistant', 'content' : i[1]}
-                            ]
-                        }
-                        '''
-                        #print(ii)
                         y.append(ii)
-
 
             f = open( '../jsonl/llm.'+ outfile.strip() +'.jsonl', 'a')
             for i in y:
