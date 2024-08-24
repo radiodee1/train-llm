@@ -63,6 +63,16 @@ class Kernel:
             for j in x:
                 if j == "conversations":
                     for i in x[j]:
+                        multi = []
+                        multi.append({'role': 'system', 'content' : 'You are a helpful assistant.'})
+                        for m in range(len(i)):
+                            if m % 2 == 0:
+                                r = 'user'
+                            else:
+                                r = 'assistant'
+                            multi.append({'role': r, 'content': i[m]})
+                        ii = { 'messages' : multi }
+                        '''
                         ii = {'messages' : 
                             [ 
                              {'role': 'system', 'content' : 'You are a helpful assistant.'},
@@ -70,6 +80,7 @@ class Kernel:
                              {'role': 'assistant', 'content' : i[1]}
                             ]
                         }
+                        '''
                         #print(ii)
                         y.append(ii)
 
