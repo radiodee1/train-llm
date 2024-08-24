@@ -47,6 +47,10 @@ class Kernel:
 
     def save_file(self,  time, heading=""):
         if self.file:
+            if not os.path.isdir('../txt'):
+                print("must be in src dir with train.py.")
+                return
+
             f = open( '../txt/llm.'+ OPENAI_MODEL.strip() +'.txt', 'a')
             if heading.strip() != "":
                 f.write(str(heading) + '\n')
