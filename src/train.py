@@ -6,7 +6,7 @@ import os
 import yaml
 import json
 from openai import OpenAI
-
+import time 
 
 vals = dotenv_values(os.path.expanduser('~') + "/.llm.env")
 
@@ -48,8 +48,9 @@ class Kernel:
         client = OpenAI( organization = OPENAI_ORGANIZATION )
         response = client.files.list()
         print(response)
+        print(response.to_dict())
         self.save_file(0, '---\nlist')
-        self.save_file(0, str(response))
+        self.save_file(0, str(response.to_dict()))
 
     def submit(self, filename):
         filename = '../jsonl/llm.' + filename + '.jsonl'
@@ -62,9 +63,9 @@ class Kernel:
           file=open(filename, "rb"),
           purpose="fine-tune"
         )
-        print(response)
+        print(response.to_dict())
         self.save_file(0, '---\nsubmit ' + filename)
-        self.save_file(0, str(response))
+        self.save_file(0, str(response.to_dict()))
 
     def save_jsonl(self, infile, outfile='train'):
          if True:
@@ -108,7 +109,7 @@ class Kernel:
         if self.verbose:
             print(*text)
 
-    def save_file(self,  time, heading=""):
+    def save_file(self,  time_in , heading=""):
         if self.file:
             if not os.path.isdir('../txt'):
                 print("must be in 'src/' dir with 'train.py' and 'txt/' dir above.")
@@ -116,14 +117,18 @@ class Kernel:
 
             f = open( '../txt/llm.'+ OPENAI_MODEL.strip() +'.txt', 'a')
             if heading.strip() != "":
+                t = time.localtime()
+                
+                current_time = time.strftime("%x  %H:%M:%S", t)
+                f.write(str(current_time) + '\n')
                 f.write(str(heading) + '\n')
                 f.close()
                 return
 
             f.write(str(self.file_num) + '\n')
-            if time != 0:
+            if time_in != 0:
                 f.write("---\n")
-                f.write(str(time) + "\n")
+                f.write(str(time_in) + "\n")
             f.write("+++\n")
 
             f.close()
@@ -153,9 +158,11 @@ if __name__ == '__main__':
         exit() 
 
     if args.submit != None and args.submit.strip() != "":
+        k.file = True 
         k.submit(args.submit)
         exit()
 
     if args.list_files:
+        k.file = True
         k.list_files()
         exit()
