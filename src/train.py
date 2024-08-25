@@ -5,7 +5,8 @@ from dotenv import  dotenv_values
 import os
 import yaml
 import json
-#
+from openai import OpenAI
+
 
 vals = dotenv_values(os.path.expanduser('~') + "/.llm.env")
 
@@ -13,6 +14,8 @@ try:
     OPENAI_API_KEY=str(vals['OPENAI_API_KEY'])
 except:
     OPENAI_API_KEY='abc'
+
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 try:
     OPENAI_ORGANIZATION=str(vals['OPENAI_ORGANIZATION'])
@@ -40,6 +43,28 @@ class Kernel:
         self.verbose = False
         self.file = True
         self.file_num = 0
+
+    def list_files(self):
+        client = OpenAI( organization = OPENAI_ORGANIZATION )
+        response = client.files.list()
+        print(response)
+        self.save_file(0, '---\nlist')
+        self.save_file(0, str(response))
+
+    def submit(self, filename):
+        filename = '../jsonl/llm.' + filename + '.jsonl'
+        if not os.path.isfile( filename ):
+            print('something is not in the right place.')
+            return
+        client = OpenAI( organization = OPENAI_ORGANIZATION )
+
+        response = client.files.create(
+          file=open(filename, "rb"),
+          purpose="fine-tune"
+        )
+        print(response)
+        self.save_file(0, '---\nsubmit ' + filename)
+        self.save_file(0, str(response))
 
     def save_jsonl(self, infile, outfile='train'):
          if True:
@@ -96,9 +121,6 @@ class Kernel:
                 return
 
             f.write(str(self.file_num) + '\n')
-            #f.write(identifiers['user'] + " : "+ str(self.memory_user[-1]) + "\n")
-            #f.write(identifiers['ai'] + " : " + str(self.memory_ai[-1]) + "\n")
-            #f.write(str(prompt) + "\n")
             if time != 0:
                 f.write("---\n")
                 f.write(str(time) + "\n")
@@ -115,6 +137,8 @@ if __name__ == '__main__':
     parser.add_argument('--file', action="store_true", help="Save ouput to file.")
     parser.add_argument('--verbose', action="store_true", help="Print ouput to the screen.")
     parser.add_argument('--jsonl', type=str, help="Add specified corpus file to jsonl file.")
+    parser.add_argument('--submit', type=str, help="Submit specified file to OpenAI.")
+    parser.add_argument('--list_files', action="store_true", help="List all uploaded files on OpenAI.")
 
     args = parser.parse_args()
     print(args)
@@ -126,3 +150,12 @@ if __name__ == '__main__':
 
     if args.jsonl != None and args.jsonl.strip() != "":
         k.save_jsonl(args.jsonl)
+        exit() 
+
+    if args.submit != None and args.submit.strip() != "":
+        k.submit(args.submit)
+        exit()
+
+    if args.list_files:
+        k.list_files()
+        exit()
