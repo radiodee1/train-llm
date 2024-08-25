@@ -4,6 +4,8 @@ python-dotenv==1.0.1
 requirements-parser==0.9.0
 
 pyyaml==6.0.2
+tiktoken==0.7.0
+numpy==2.1.0
 
 ## script libraries below ##
 #gensim==4.3.3
