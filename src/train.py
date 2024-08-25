@@ -44,13 +44,28 @@ class Kernel:
         self.file = True
         self.file_num = 0
 
+    def file_id(self, index):
+        index = int(index)
+        r = open ( '../txt/llm.list.txt', 'r' )
+        m =  r.read()
+        r.close()
+        m = m.replace('\'', '"')
+        m = m.replace('None', '"None"')
+        m = m.replace('False', '"False"')
+        i = json.loads(m)
+        i = i["data"][index]["id"]
+        
+        print(i)
+        return i
+        
+
     def list_files(self):
         client = OpenAI( organization = OPENAI_ORGANIZATION )
         response = client.files.list()
-        print(response)
         print(response.to_dict())
         self.save_file(0, '---\nlist')
         self.save_file(0, str(response.to_dict()))
+        self.save_file(0, str(response.to_dict()), 'list', 'w')
 
     def submit(self, filename):
         filename = '../jsonl/llm.' + filename + '.jsonl'
@@ -109,18 +124,19 @@ class Kernel:
         if self.verbose:
             print(*text)
 
-    def save_file(self,  time_in , heading=""):
+    def save_file(self,  time_in , heading="", filename=OPENAI_MODEL.strip(), mode='a'):
         if self.file:
             if not os.path.isdir('../txt'):
                 print("must be in 'src/' dir with 'train.py' and 'txt/' dir above.")
                 return
 
-            f = open( '../txt/llm.'+ OPENAI_MODEL.strip() +'.txt', 'a')
+            f = open( '../txt/llm.'+ filename.strip() +'.txt', mode)
             if heading.strip() != "":
                 t = time.localtime()
                 
                 current_time = time.strftime("%x  %H:%M:%S", t)
-                f.write(str(current_time) + '\n')
+                if mode != 'w':
+                    f.write(str(current_time) + '\n')
                 f.write(str(heading) + '\n')
                 f.close()
                 return
@@ -144,9 +160,11 @@ if __name__ == '__main__':
     parser.add_argument('--jsonl', type=str, help="Add specified corpus file to jsonl file.")
     parser.add_argument('--submit', type=str, help="Submit specified file to OpenAI.")
     parser.add_argument('--list_files', action="store_true", help="List all uploaded files on OpenAI.")
+    parser.add_argument('--id', default=None, help="Return id of file from list at index.")
 
     args = parser.parse_args()
-    print(args)
+    if args.id == None:
+        print(args)
 
     k.save_file(0, str(args))
 
@@ -165,4 +183,8 @@ if __name__ == '__main__':
     if args.list_files:
         k.file = True
         k.list_files()
+        exit()
+
+    if args.id != None:
+        k.file_id(args.id)
         exit()
