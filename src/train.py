@@ -57,7 +57,16 @@ class Kernel:
         
         print(i)
         return i
-        
+
+    def list_jobs(self):
+        client = OpenAI( organization = OPENAI_ORGANIZATION )
+        response = client.fine_tuning.jobs.list()
+        print(response.to_dict())
+        self.save_file(0, '---\nlist')
+        self.save_file(0, str(response.to_dict()))
+        self.save_file(0, str(response.to_dict()), 'jobs', 'w')
+
+       
 
     def list_files(self):
         client = OpenAI( organization = OPENAI_ORGANIZATION )
@@ -160,6 +169,7 @@ if __name__ == '__main__':
     parser.add_argument('--jsonl', type=str, help="Add specified corpus file to jsonl file.")
     parser.add_argument('--submit', type=str, help="Submit specified file to OpenAI.")
     parser.add_argument('--list_files', action="store_true", help="List all uploaded files on OpenAI.")
+    parser.add_argument('--list_jobs', action="store_true", help="List all started jobs on OpenAI.")
     parser.add_argument('--id', default=None, help="Return id of file from list at index.")
 
     args = parser.parse_args()
@@ -183,6 +193,11 @@ if __name__ == '__main__':
     if args.list_files:
         k.file = True
         k.list_files()
+        exit()
+
+    if args.list_jobs:
+        k.file = True
+        k.list_jobs()
         exit()
 
     if args.id != None:
