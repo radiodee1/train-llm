@@ -49,6 +49,12 @@ class Kernel:
         self.file = True
         self.file_num = 0
 
+    def cancel_job(self, index):
+        index = int(index)
+        jobname = self.job_id(index)
+        client = OpenAI( organization = OPENAI_ORGANIZATION )
+        client.fine_tuning.jobs.cancel(jobname)
+
     def job_id(self, index):
         index = int(index)
         r = open ( '../txt/llm.jobs.txt', 'r' )
@@ -204,6 +210,7 @@ if __name__ == '__main__':
     parser.add_argument('--id', default=None, help="Return id of file from list at index.")
     parser.add_argument('--job', default=None, help="Return id of file from list of jobs at index.")
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
+    parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
@@ -243,4 +250,8 @@ if __name__ == '__main__':
 
     if args.start_job != None:
         k.start_job(args.start_job)
+        exit()
+
+    if args.cancel_job != None:
+        k.cancel_job(args.cancel_job)
         exit()
