@@ -33,6 +33,11 @@ except:
     OPENAI_MODEL="gpt-3.5-turbo"
 
 try:
+    OPENAI_MODEL_FINETUNE=str(vals['OPENAI_MODEL_FINETUNE'])
+except:
+    OPENAI_MODEL_FINETUNE="gpt-4o-mini-2024-07-18"
+
+try:
     OPENAI_URL=str(vals['OPENAI_URL'])
 except:
     OPENAI_URL="https://api.openai.com/v1/chat/completions"
@@ -43,6 +48,20 @@ class Kernel:
         self.verbose = False
         self.file = True
         self.file_num = 0
+
+    def job_id(self, index):
+        index = int(index)
+        r = open ( '../txt/llm.jobs.txt', 'r' )
+        m =  r.read()
+        r.close()
+        m = m.replace('\'', '"')
+        m = m.replace('None', '"None"')
+        m = m.replace('False', '"False"')
+        i = json.loads(m)
+        i = i["data"][index]["id"]
+        
+        print(i)
+        return i
 
     def file_id(self, index):
         index = int(index)
@@ -62,17 +81,15 @@ class Kernel:
         client = OpenAI( organization = OPENAI_ORGANIZATION )
         response = client.fine_tuning.jobs.list()
         print(response.to_dict())
-        self.save_file(0, '---\nlist')
+        self.save_file(0, '---\nlist jobs')
         self.save_file(0, str(response.to_dict()))
         self.save_file(0, str(response.to_dict()), 'jobs', 'w')
-
-       
 
     def list_files(self):
         client = OpenAI( organization = OPENAI_ORGANIZATION )
         response = client.files.list()
         print(response.to_dict())
-        self.save_file(0, '---\nlist')
+        self.save_file(0, '---\nlist files')
         self.save_file(0, str(response.to_dict()))
         self.save_file(0, str(response.to_dict()), 'list', 'w')
 
@@ -85,11 +102,25 @@ class Kernel:
 
         response = client.files.create(
           file=open(filename, "rb"),
-          purpose="fine-tune"
+          purpose="fine-tune",
         )
+
         print(response.to_dict())
         self.save_file(0, '---\nsubmit ' + filename)
         self.save_file(0, str(response.to_dict()))
+
+    def start_job(self, index):
+        file_id = self.file_id(int(index))
+        client = OpenAI( organization = OPENAI_ORGANIZATION )
+        response = client.fine_tuning.jobs.create(
+            training_file= file_id,
+            model=OPENAI_MODEL_FINETUNE,
+            hyperparameters={
+                'n_epochs': 2
+            }
+        )
+        print(response.to_dict())
+ 
 
     def save_jsonl(self, infile, outfile='train'):
          if True:
@@ -171,9 +202,11 @@ if __name__ == '__main__':
     parser.add_argument('--list_files', action="store_true", help="List all uploaded files on OpenAI.")
     parser.add_argument('--list_jobs', action="store_true", help="List all started jobs on OpenAI.")
     parser.add_argument('--id', default=None, help="Return id of file from list at index.")
+    parser.add_argument('--job', default=None, help="Return id of file from list of jobs at index.")
+    parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
 
     args = parser.parse_args()
-    if args.id == None:
+    if args.id == None and args.job == None:
         print(args)
 
     k.save_file(0, str(args))
@@ -202,4 +235,12 @@ if __name__ == '__main__':
 
     if args.id != None:
         k.file_id(args.id)
+        exit()
+
+    if args.job != None:
+        k.job_id(args.job)
+        exit()
+
+    if args.start_job != None:
+        k.start_job(args.start_job)
         exit()
