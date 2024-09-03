@@ -48,6 +48,7 @@ class Kernel:
         self.verbose = False
         self.file = True
         self.file_num = 0
+        self.epochs = 0 
 
     def cancel_job(self, index):
         index = int(index)
@@ -122,7 +123,7 @@ class Kernel:
             training_file= file_id,
             model=OPENAI_MODEL_FINETUNE,
             hyperparameters={
-                'n_epochs': 2
+                'n_epochs': self.epochs
             }
         )
         print(response.to_dict())
@@ -211,6 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('--job', default=None, help="Return id of file from list of jobs at index.")
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
     parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
+    parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for train.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
@@ -220,6 +222,7 @@ if __name__ == '__main__':
 
     k.file = args.file 
     k.verbose = args.verbose
+    k.epochs = args.epochs
 
     if args.jsonl != None and args.jsonl.strip() != "":
         k.save_jsonl(args.jsonl)
