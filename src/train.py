@@ -212,7 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('--job', default=None, help="Return id of file from list of jobs at index.")
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
     parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
-    parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for train.")
+    parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
