@@ -89,7 +89,7 @@ class Kernel:
         response = client.fine_tuning.jobs.list()
         print(response.to_dict())
         self.save_file(0, '---\nlist jobs')
-        self.save_file(0, str(response.to_dict()))
+        self.save_file(0, str(response.to_dict()), OPENAI_MODEL_FINETUNE.strip())
         self.save_file(0, str(response.to_dict()), 'jobs', 'w')
 
     def list_files(self):
