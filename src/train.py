@@ -56,6 +56,18 @@ class Kernel:
         self.file = True
         self.file_num = 0
         self.epochs = 0 
+    
+
+    def delete_ckpt(self, ckpt):
+        ckpt = str(ckpt)
+        
+        result = requests.delete(
+                OPENAI_URL_DELETE + ckpt, 
+                headers={ 'Authorization': 'Bearer ' + OPENAI_API_KEY }
+            )
+        print(result.text)
+        pass 
+
 
     def delete_model(self, index):
         index = int(index)
@@ -64,7 +76,6 @@ class Kernel:
                 OPENAI_URL_DELETE + jobname, 
                 headers={ 'Authorization': 'Bearer ' + OPENAI_API_KEY }
             )
-        print( OPENAI_API_KEY + "\n---")
         print(result.text)
         pass 
 
@@ -245,6 +256,7 @@ if __name__ == '__main__':
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
     parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
     parser.add_argument('--delete_model', default=None, help="Delete model.")
+    parser.add_argument('--delete_ckpt', default=None, help="Delete model or checkpoint.")
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
 
     args = parser.parse_args()
@@ -296,3 +308,5 @@ if __name__ == '__main__':
         k.delete_model(args.delete_model)
         exit()
 
+    if args.delete_ckpt != None:
+        k.delete_ckpt(args.delete_ckpt)
