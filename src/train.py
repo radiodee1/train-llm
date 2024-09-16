@@ -310,3 +310,4 @@ if __name__ == '__main__':
 
     if args.delete_ckpt != None:
         k.delete_ckpt(args.delete_ckpt)
+        exit()
