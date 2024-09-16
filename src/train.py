@@ -6,7 +6,8 @@ import os
 import yaml
 import json
 from openai import OpenAI
-import time 
+import time
+import requests
 
 vals = dotenv_values(os.path.expanduser('~') + "/.llm.env")
 
@@ -42,6 +43,12 @@ try:
 except:
     OPENAI_URL="https://api.openai.com/v1/chat/completions"
 
+try:
+    OPENAI_URL_DELETE=str(vals['OPENAI_URL_DELETE'])
+except:
+    OPENAI_URL_DELETE="https://api.openai.com/v1/models/"
+
+
 class Kernel:
 
     def __init__(self):
@@ -50,11 +57,36 @@ class Kernel:
         self.file_num = 0
         self.epochs = 0 
 
+    def delete_model(self, index):
+        index = int(index)
+        jobname = self.model_id(index)
+        result = requests.delete(
+                OPENAI_URL_DELETE + jobname, 
+                headers={ 'Authorization': 'Bearer ' + OPENAI_API_KEY }
+            )
+        print( OPENAI_API_KEY + "\n---")
+        print(result.text)
+        pass 
+
     def cancel_job(self, index):
         index = int(index)
         jobname = self.job_id(index)
         client = OpenAI( organization = OPENAI_ORGANIZATION )
         client.fine_tuning.jobs.cancel(jobname)
+
+    def model_id(self, index):
+        index = int(index)
+        r = open ( '../txt/llm.jobs.txt', 'r' )
+        m =  r.read()
+        r.close()
+        m = m.replace('\'', '"')
+        m = m.replace('None', '"None"')
+        m = m.replace('False', '"False"')
+        i = json.loads(m)
+        i = i["data"][index]["fine_tuned_model"]
+        
+        print(i)
+        return i
 
     def job_id(self, index):
         index = int(index)
@@ -212,6 +244,7 @@ if __name__ == '__main__':
     parser.add_argument('--job', default=None, help="Return id of file from list of jobs at index.")
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
     parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
+    parser.add_argument('--delete_model', default=None, help="Delete model.")
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
 
     args = parser.parse_args()
@@ -258,3 +291,8 @@ if __name__ == '__main__':
     if args.cancel_job != None:
         k.cancel_job(args.cancel_job)
         exit()
+
+    if args.delete_model != None:
+        k.delete_model(args.delete_model)
+        exit()
+
