@@ -240,6 +240,39 @@ class Kernel:
             f.close()
             self.file_num += 1
         pass 
+
+    def questions_only(self, infile, outfile='questions'):
+        
+        if not os.path.isdir('../jsonl'):
+            print("must be in 'src/' dir with 'train.py' and 'jsonl/' dir above.")
+            return
+        if not os.path.isdir('../../chatterbot-corpus'):
+            print("did you clone chatterbot-corpus??")
+            return
+        corpus_name = '../../chatterbot-corpus/chatterbot_corpus/data/english/' + infile + '.yml'
+        if not os.path.isfile(corpus_name):
+            print(infile, corpus_name)
+            print('something is not in the right place.')
+            return
+        c = open( corpus_name, 'r' )
+        #x = json.dumps(yaml.safe_load(c))
+        x = yaml.safe_load(c)
+        c.close()
+        y = []
+
+        for j in x:
+            if j == "conversations":
+                for i in x[j]:
+                    for m in range(len(i)):
+                        if m % 2 == 0:
+                            #r = 'user'
+                            y.append(i[m])
+        f = open( '../jsonl/llm.'+ outfile.strip() +'.txt', 'a')
+        for i in y:
+            f.write(str(i) + '\n')
+        f.close()
+
+        pass 
  
 if __name__ == '__main__':
     k = Kernel()
@@ -258,6 +291,7 @@ if __name__ == '__main__':
     parser.add_argument('--delete_model', default=None, help="Delete model.")
     parser.add_argument('--delete_ckpt', default=None, help="Delete model or checkpoint.")
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
+    parser.add_argument('--questions', type=str, help="Make 'questions-only' file.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
@@ -310,4 +344,8 @@ if __name__ == '__main__':
 
     if args.delete_ckpt != None:
         k.delete_ckpt(args.delete_ckpt)
+        exit()
+
+    if args.questions != None:
+        k.questions_only(args.questions)
         exit()

@@ -8,7 +8,7 @@ if [ -f '../jsonl/llm.questions.txt' ]; then
     exit 
 fi 
 
-touch ../jsonl/subject.txt
+touch ../jsonl/subject-questions.txt
 
 
 while read x; do
