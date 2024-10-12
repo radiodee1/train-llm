@@ -55,7 +55,8 @@ class Kernel:
         self.verbose = False
         self.file = True
         self.file_num = 0
-        self.epochs = 0 
+        self.epochs = 0
+        self.limit = -1  
     
 
     def delete_ckpt(self, ckpt):
@@ -206,8 +207,12 @@ class Kernel:
                         y.append(ii)
 
             f = open( '../jsonl/llm.'+ outfile.strip() +'.jsonl', 'a')
+            num = 0 
             for i in y:
                 f.write(json.dumps(i) + '\n')
+                if num > self.limit and self.limit != -1:
+                    break
+                num += 1 
             f.close()
 
     def p(self, *text):
@@ -268,8 +273,13 @@ class Kernel:
                             #r = 'user'
                             y.append(i[m])
         f = open( '../jsonl/llm.'+ outfile.strip() +'.txt', 'a')
+
+        num = 0 
         for i in y:
             f.write(str(i) + '\n')
+            if num > self.limit and self.limit != -1:
+                break 
+            num += 1 
         f.close()
 
         pass 
@@ -292,6 +302,7 @@ if __name__ == '__main__':
     parser.add_argument('--delete_ckpt', default=None, help="Delete model or checkpoint.")
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
     parser.add_argument('--questions', type=str, help="Make 'questions-only' file.")
+    parser.add_argument('--limit', type=int, default=40, help="Limit lenght of 'questions' or 'jsonl' output.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
@@ -302,6 +313,7 @@ if __name__ == '__main__':
     k.file = args.file 
     k.verbose = args.verbose
     k.epochs = args.epochs
+    k.limit = args.limit
 
     if args.jsonl != None and args.jsonl.strip() != "":
         k.save_jsonl(args.jsonl)

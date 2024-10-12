@@ -29,4 +29,10 @@ while read x; do
 done < '../jsonl/subject.txt'
 
 echo '+++++++++++++++++'
-cat ../jsonl/llm.train.jsonl
+
+head -n 20 ../jsonl/llm.train.jsonl > ../jsonl/llm.train.jsonl.temp
+
+cat ../jsonl/llm.train.jsonl.temp
+
+rm ../jsonl/llm.train.jsonl
+mv ../jsonl/llm.train.jsonl.temp ../jsonl/llm.train.jsonl 
