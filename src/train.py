@@ -57,7 +57,14 @@ class Kernel:
         self.file_num = 0
         self.epochs = 0
         self.limit = -1  
-    
+   
+    def list_ckpt(self, ckpt):
+        ckpt = str(ckpt)
+        result = requests.get(
+                'https://api.openai.com/v1/fine_tuning/jobs/' + ckpt + '/checkpoints',
+                headers={ 'Authorization': 'Bearer '+ OPENAI_API_KEY }
+            )
+        print(result.text)
 
     def delete_ckpt(self, ckpt):
         ckpt = str(ckpt)
@@ -299,6 +306,7 @@ if __name__ == '__main__':
     parser.add_argument('--start_job', default=None, help="Start fine-tune job.")
     parser.add_argument('--cancel_job', default=None, help="Cancel start_job.")
     parser.add_argument('--delete_model', default=None, help="Delete model.")
+    parser.add_argument('--list_ckpt', default=None, help="list checkpoint on screen.")
     parser.add_argument('--delete_ckpt', default=None, help="Delete model or checkpoint.")
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
     parser.add_argument('--questions', type=str, help="Make 'questions-only' file.")
@@ -352,6 +360,10 @@ if __name__ == '__main__':
 
     if args.delete_model != None:
         k.delete_model(args.delete_model)
+        exit()
+    
+    if args.list_ckpt != None:
+        k.list_ckpt(args.list_ckpt)
         exit()
 
     if args.delete_ckpt != None:
