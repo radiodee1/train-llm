@@ -56,7 +56,8 @@ class Kernel:
         self.file = True
         self.file_num = 0
         self.epochs = 0
-        self.limit = -1  
+        self.limit = -1 
+        self.completion = False
    
     def list_ckpt(self, ckpt):
         ckpt = str(ckpt)
@@ -152,6 +153,8 @@ class Kernel:
         self.save_file(0, str(response.to_dict()), 'list', 'w')
 
     def submit(self, filename):
+        if self.completion:
+            filename += '.completion'
         filename = '../jsonl/llm.' + filename + '.jsonl'
         if not os.path.isfile( filename ):
             print('something is not in the right place.')
@@ -202,18 +205,35 @@ class Kernel:
             for j in x:
                 if j == "conversations":
                     for i in x[j]:
-                        multi = []
-                        multi.append({'role': 'system', 'content' : 'You are a helpful assistant.'})
+                        #multi = []
+                        if not self.completion:
+                            multi = []
+                            multi.append({'role': 'system', 'content' : 'You are a helpful assistant.'})
+                        else:
+                            multi = {}
                         for m in range(len(i)):
                             if m % 2 == 0:
                                 r = 'user'
+                                pc = 'prompt'
                             else:
                                 r = 'assistant'
-                            multi.append({'role': r, 'content': i[m]})
-                        ii = { 'messages' : multi }
+                                pc = 'completion'
+
+                            if not self.completion:
+                                multi.append({'role': r, 'content': i[m]})
+                            else:
+                                multi[pc] = i[m]
+                        if not self.completion:
+                            ii = { 'messages' : multi }
+                        else:
+                            ii = multi
                         y.append(ii)
 
-            f = open( '../jsonl/llm.'+ outfile.strip() +'.jsonl', 'a')
+            if not self.completion:
+                name = '.jsonl'
+            else:
+                name = '.completion.jsonl'
+            f = open( '../jsonl/llm.'+ outfile.strip() + name , 'a')
             num = 0 
             for i in y:
                 f.write(json.dumps(i) + '\n')
@@ -311,6 +331,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=3, help="Specify number of epochs for fine-tune.")
     parser.add_argument('--questions', type=str, help="Make 'questions-only' file.")
     parser.add_argument('--limit', type=int, default=40, help="Limit lenght of 'questions' or 'jsonl' output.")
+    parser.add_argument('--completion', action="store_true", help="Use prompt-completion format with jsonl.")
 
     args = parser.parse_args()
     if args.id == None and args.job == None:
@@ -322,6 +343,7 @@ if __name__ == '__main__':
     k.verbose = args.verbose
     k.epochs = args.epochs
     k.limit = args.limit
+    k.completion = args.completion
 
     if args.jsonl != None and args.jsonl.strip() != "":
         k.save_jsonl(args.jsonl)
